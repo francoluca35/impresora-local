@@ -187,9 +187,7 @@ function generarTicketDelivery({ nombre, direccion, productos, total, modo, obse
   }
   
   ticket += "\n\n";
-  // Asegurar que el total sea un número válido
-  const totalNumerico = parseFloat(total) || 0;
-  ticket += `TOTAL:  $${totalNumerico.toFixed(2)} \n`;
+  ticket += `TOTAL:  $${total} \n`;
   ticket += doble + "======================\n";
   ticket += normal;
   ticket += "\n\n\n";

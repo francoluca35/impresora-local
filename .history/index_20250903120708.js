@@ -187,9 +187,7 @@ function generarTicketDelivery({ nombre, direccion, productos, total, modo, obse
   }
   
   ticket += "\n\n";
-  // Asegurar que el total sea un número válido
-  const totalNumerico = parseFloat(total) || 0;
-  ticket += `TOTAL:  $${totalNumerico.toFixed(2)} \n`;
+  ticket += `TOTAL:  $${total} \n`;
   ticket += doble + "======================\n";
   ticket += normal;
   ticket += "\n\n\n";
@@ -236,10 +234,6 @@ app.post("/print", async (req, res) => {
     let resultadoParrilla = "Nada que imprimir";
     let resultadoCocina = "Nada que imprimir";
 
-    // Detectar si es para llevar (cuando mesa es un nombre y no un número)
-    const esParaLlevar = (isNaN(mesa) && mesa !== undefined) || 
-                         (typeof mesa === 'string' && /[a-zA-Z]/.test(mesa));
-
     if (parrilla.length > 0) {
       const ticketParrilla = generarTicketCocina({
         mesa,
@@ -249,14 +243,7 @@ app.post("/print", async (req, res) => {
         fecha,
         metodoPago,
       });
-      
-      // Enviar a PARRILLA
       resultadoParrilla = await imprimirTicket(IP_PARRILLA, ticketParrilla);
-      
-      // Si es para llevar, las brasas también van a COCINA
-      if (esParaLlevar) {
-        await imprimirTicket(IP_COCINA, ticketParrilla);
-      }
     }
 
     if (cocina.length > 0) {
