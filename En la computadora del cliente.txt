@@ -1,0 +1,19 @@
+En la computadora del cliente:
+   cd /ruta/a/impresora-local
+   git clone https://github.com/tu-usuario/impresora-servidor.git
+   cd impresora-servidor
+   npm install
+
+Configurar auto-update:
+   # Crear script auto-update.sh
+   chmod +x auto-update.sh
+   
+   # Agregar al crontab para que se ejecute cada 5 minutos
+   crontab -e
+   */5 * * * * /ruta/a/impresora-local/auto-update.sh
+
+Usar PM2 para gestión del proceso:
+   npm install -g pm2
+   pm2 start servidor-impresion.js --name "impresora"
+   pm2 startup
+   pm2 save

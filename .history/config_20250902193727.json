@@ -1,0 +1,42 @@
+{
+  "servidor": {
+    "puerto": 4000,
+    "host": "0.0.0.0"
+  },
+  "impresoras": {
+    "cocina": {
+      "ip": "192.168.1.100",
+      "puerto": 9100,
+      "timeout": 10000,
+      "nombre": "COCINA"
+    },
+    "parrilla": {
+      "ip": "192.168.1.101",
+      "puerto": 9100,
+      "timeout": 10000,
+      "nombre": "PARRILLA"
+    }
+  },
+  "tickets": {
+    "formato_fecha": "DD/MM/YYYY",
+    "formato_hora": "HH:mm",
+    "mostrar_logo": true,
+    "tamaño_fuente": {
+      "normal": "normal",
+      "doble": "doble",
+      "tercero": "tercero"
+    }
+  },
+  "sincronizacion": {
+    "intervalo_minutos": 5,
+    "repositorio": "https://github.com/francoluca35/impresora-local.git",
+    "rama": "main",
+    "auto_reiniciar": true
+  },
+  "logging": {
+    "nivel": "info",
+    "archivo": "/var/log/impresora-app.log",
+    "max_tamaño": "10MB",
+    "max_archivos": 5
+  }
+}
