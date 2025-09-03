@@ -188,20 +188,9 @@ function generarTicketDelivery({ nombre, direccion, productos, total, modo, obse
   }
   
   ticket += "\n\n";
-  // Calcular el total si no se proporciona, o usar el proporcionado
-  let totalFinal;
-  if (total !== null && total !== undefined) {
-    totalFinal = parseFloat(total) || 0;
-  } else {
-    // Calcular total internamente sumando precio × cantidad de cada producto
-    totalFinal = productos.reduce((acc, p) => {
-      const precio = parseFloat(p.precio) || 0;
-      const cantidad = parseInt(p.cantidad) || 1;
-      return acc + (precio * cantidad);
-    }, 0);
-  }
-  
-  ticket += `TOTAL:  $${totalFinal.toFixed(2)} \n`;
+  // Asegurar que el total sea un número válido
+  const totalNumerico = parseFloat(total) || 0;
+  ticket += `TOTAL:  $${totalNumerico.toFixed(2)} \n`;
   ticket += doble + "======================\n";
   ticket += normal;
   ticket += "\n\n\n";
@@ -337,7 +326,7 @@ app.post("/printdelivery", async (req, res) => {
         nombre,
         direccion,
         productos: productos, // TODOS los productos (no solo parrilla)
-        total: null, // No usar total predefinido, calcularlo internamente
+        total,
         modo,
         observacion,
       });
@@ -352,7 +341,7 @@ app.post("/printdelivery", async (req, res) => {
         nombre,
         direccion,
         productos: cocina,
-        total: null, // No usar total predefinido, calcularlo internamente
+        total,
         modo,
         observacion,
       });

@@ -188,20 +188,9 @@ function generarTicketDelivery({ nombre, direccion, productos, total, modo, obse
   }
   
   ticket += "\n\n";
-  // Calcular el total si no se proporciona, o usar el proporcionado
-  let totalFinal;
-  if (total !== null && total !== undefined) {
-    totalFinal = parseFloat(total) || 0;
-  } else {
-    // Calcular total internamente sumando precio × cantidad de cada producto
-    totalFinal = productos.reduce((acc, p) => {
-      const precio = parseFloat(p.precio) || 0;
-      const cantidad = parseInt(p.cantidad) || 1;
-      return acc + (precio * cantidad);
-    }, 0);
-  }
-  
-  ticket += `TOTAL:  $${totalFinal.toFixed(2)} \n`;
+  // Asegurar que el total sea un número válido
+  const totalNumerico = parseFloat(total) || 0;
+  ticket += `TOTAL:  $${totalNumerico.toFixed(2)} \n`;
   ticket += doble + "======================\n";
   ticket += normal;
   ticket += "\n\n\n";
@@ -261,7 +250,11 @@ app.post("/print", async (req, res) => {
           nombre: mesa, // Usar el nombre del cliente
           direccion: null,
           productos: productos, // TODOS los productos (no solo parrilla)
-          total: null, // No usar total predefinido, calcularlo internamente
+          total: productos.reduce((acc, p) => {
+            const precio = parseFloat(p.precio) || 0;
+            const cantidad = parseInt(p.cantidad) || 1;
+            return acc + (precio * cantidad);
+          }, 0),
           modo: "retiro", // Para llevar
           observacion: null,
           orden: orden, // Usar la orden original del pedido
@@ -330,33 +323,50 @@ app.post("/printdelivery", async (req, res) => {
     let resultadoParrilla = "Nada que imprimir";
     let resultadoCocina = "Nada que imprimir";
 
-    // Para DELIVERY: Si hay brasas, generar UN SOLO TICKET y enviarlo a AMBAS impresoras
+    // Para DELIVERY: Productos "brasas" van a AMBAS impresoras
     if (parrilla.length > 0) {
-      // Generar UN SOLO TICKET con TODOS los productos
-      const ticketParaImprimir = generarTicketDelivery({
+      const ticketParrilla = generarTicketDelivery({
         nombre,
         direccion,
-        productos: productos, // TODOS los productos (no solo parrilla)
-        total: null, // No usar total predefinido, calcularlo internamente
+        productos: parrilla,
+        total,
         modo,
         observacion,
       });
       
-      // ENVIAR EL MISMO TICKET A AMBAS IMPRESORAS (DUPLICADO)
-      resultadoParrilla = await imprimirTicket(IP_PARRILLA, ticketParaImprimir);
-      resultadoCocina = await imprimirTicket(IP_COCINA, ticketParaImprimir);
+      // Enviar a PARRILLA
+      resultadoParrilla = await imprimirTicket(IP_PARRILLA, ticketParrilla);
       
-    } else if (cocina.length > 0) {
-      // Solo productos de cocina (sin brasas) van solo a COCINA
+      // TAMBIÉN enviar a COCINA (para delivery, brasas van a ambas)
+      const resultadoCocinaBrasas = await imprimirTicket(IP_COCINA, ticketParrilla);
+      
+      // Si no hay productos de cocina normales, usar el resultado de las brasas
+      if (cocina.length === 0) {
+        resultadoCocina = resultadoCocinaBrasas;
+      } else {
+        // Si hay productos de cocina normales, combinar los resultados
+        resultadoCocina = `${resultadoCocinaBrasas} + productos normales`;
+      }
+    }
+
+    // Productos NO "brasas" solo van a COCINA
+    if (cocina.length > 0) {
       const ticketCocina = generarTicketDelivery({
         nombre,
         direccion,
         productos: cocina,
-        total: null, // No usar total predefinido, calcularlo internamente
+        total,
         modo,
         observacion,
       });
-      resultadoCocina = await imprimirTicket(IP_COCINA, ticketCocina);
+      const resultadoCocinaNormal = await imprimirTicket(IP_COCINA, ticketCocina);
+      
+      // Si ya se enviaron brasas a cocina, combinar resultados
+      if (parrilla.length > 0) {
+        resultadoCocina = resultadoCocina.replace(' + productos normales', ` + ${resultadoCocinaNormal}`);
+      } else {
+        resultadoCocina = resultadoCocinaNormal;
+      }
     }
 
     res.json({

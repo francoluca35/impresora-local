@@ -352,7 +352,7 @@ app.post("/printdelivery", async (req, res) => {
         nombre,
         direccion,
         productos: cocina,
-        total: null, // No usar total predefinido, calcularlo internamente
+        total,
         modo,
         observacion,
       });
