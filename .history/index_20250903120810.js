@@ -255,12 +255,7 @@ app.post("/print", async (req, res) => {
       
       // Si es para llevar, las brasas también van a COCINA
       if (esParaLlevar) {
-        const resultadoCocinaBrasas = await imprimirTicket(IP_COCINA, ticketParrilla);
-        
-        // Si no hay productos de cocina normales, usar el resultado de las brasas
-        if (cocina.length === 0) {
-          resultadoCocina = resultadoCocinaBrasas;
-        }
+        await imprimirTicket(IP_COCINA, ticketParrilla);
       }
     }
 
@@ -316,12 +311,7 @@ app.post("/printdelivery", async (req, res) => {
       resultadoParrilla = await imprimirTicket(IP_PARRILLA, ticketParrilla);
       
       // TAMBIÉN enviar a COCINA (para delivery, brasas van a ambas)
-      const resultadoCocinaBrasas = await imprimirTicket(IP_COCINA, ticketParrilla);
-      
-      // Si no hay productos de cocina normales, usar el resultado de las brasas
-      if (cocina.length === 0) {
-        resultadoCocina = resultadoCocinaBrasas;
-      }
+      await imprimirTicket(IP_COCINA, ticketParrilla);
     }
 
     // Productos NO "brasas" solo van a COCINA
